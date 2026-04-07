@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Health Info</a>
+      <a href="signup.html">Sign Up</a>
+    </nav>
+  </header>
+
+  <main style="display: flex; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 400px;">
+      <h2 class="text-center">Login</h2>
+      <div id="errorMsg" class="alert alert-error hidden"></div>
+      
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+        
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+        
+        <button type="submit" class="btn w-100" style="width: 100%;">Login</button>
+      </form>
+      <p class="text-center mt-3">Don't have an account? <a href="signup.html">Sign Up</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      
+      errorMsg.classList.add('hidden');
+      
+      try {
+        const res = await api.login(email, password);
+        if (res.token) {
+          api.setToken(res.token);
+          api.setUser(res);
+          window.location.href = 'dashboard.html';
+        } else {
+          errorMsg.textContent = res.message || 'Login failed';
+          errorMsg.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Network error. Try again.';
+        errorMsg.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

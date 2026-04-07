@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Health Info</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <main style="display: flex; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 400px;">
+      <h2 class="text-center">Sign Up</h2>
+      <div id="errorMsg" class="alert alert-error hidden"></div>
+      
+      <form id="signupForm">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required>
+        
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+        
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+        
+        <label for="role">Register As</label>
+        <select id="role" required>
+          <option value="user">Villager / User</option>
+          <option value="admin">Doctor / Admin</option>
+        </select>
+        
+        <button type="submit" class="btn" style="width: 100%;">Create Account</button>
+      </form>
+      <p class="text-center mt-3">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const errorMsg = document.getElementById('errorMsg');
+      
+      errorMsg.classList.add('hidden');
+      
+      try {
+        const res = await api.register(name, email, password, role);
+        if (res.token) {
+          api.setToken(res.token);
+          api.setUser(res);
+          window.location.href = 'dashboard.html';
+        } else {
+          errorMsg.textContent = res.message || 'Registration failed';
+          errorMsg.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Network error. Try again.';
+        errorMsg.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

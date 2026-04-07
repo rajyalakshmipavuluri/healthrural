@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask a Doctor - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main style="display: flex; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+      <h2 class="text-center">Consult a Doctor Online</h2>
+      <p class="text-center">Describe your symptoms below. A verified doctor will review them and send you advice.</p>
+      
+      <div id="msg" class="alert hidden"></div>
+      
+      <form id="consultForm">
+        <label for="subject">Subject / Main issue</label>
+        <input type="text" id="subject" placeholder="e.g. High fever for 3 days" required>
+        
+        <label for="description">Detailed Description</label>
+        <textarea id="description" rows="5" placeholder="Please mention all your symptoms..." required></textarea>
+        
+        <button type="submit" class="btn w-100" style="width: 100%;">Submit Inquiry</button>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    if (!api.getToken() || !api.getUser()) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('consultForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('subject').value;
+      const description = document.getElementById('description').value;
+      const msg = document.getElementById('msg');
+      
+      msg.classList.add('hidden');
+      
+      try {
+        const res = await api.request('/users/consultations', 'POST', { subject, description });
+        if (res._id) {
+          msg.textContent = 'Your query has been submitted to our doctors!';
+          msg.className = 'alert alert-success';
+          document.getElementById('consultForm').reset();
+        } else {
+          msg.textContent = res.message || 'Failed to submit';
+          msg.className = 'alert alert-error';
+        }
+      } catch (err) {
+        msg.textContent = 'Network error. Try again.';
+        msg.className = 'alert alert-error';
+      }
+    });
+  </script>
+</body>
+</html>

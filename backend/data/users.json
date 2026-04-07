@@ -1,0 +1,34 @@
+[
+  {
+    "name": "raji",
+    "email": "sripavuluri0@gmail.com",
+    "password": "$2b$10$h4dSsbe1050iyhldsu4VTelIkKnXCDhShMlo0JXBi5k35TTayTH5q",
+    "role": "user",
+    "_id": "1775541431272pmgts",
+    "createdAt": "2026-04-07T05:57:11.272Z"
+  },
+  {
+    "name": "test",
+    "email": "test@test.com",
+    "password": "$2b$10$EhgUmhscva0V6j/8xrZ09OgEr0jFHM/jPAWk/oNhfrGpfZ93qSMtm",
+    "role": "user",
+    "_id": "1775559379162r0qfu",
+    "createdAt": "2026-04-07T10:56:19.162Z"
+  },
+  {
+    "name": "test2",
+    "email": "test2@test.com",
+    "password": "$2b$10$dE1yIaRxbbMUtfz5CZjbSOXVU2qUGygM8VNuqTgAv1KeWAM6namD.",
+    "role": "user",
+    "_id": "1775559507895d7l3k",
+    "createdAt": "2026-04-07T10:58:27.895Z"
+  },
+  {
+    "name": "Rajyalakshmi",
+    "email": "rajyalakshmipavuluri33@gmail.co",
+    "password": "$2b$10$hdMH.5TNtmsmTcUKnUMFEu1wkgpvdTrY7isdUghKx8KaVaT9NtL9i",
+    "role": "user",
+    "_id": "17755596298634yz0j",
+    "createdAt": "2026-04-07T11:00:29.863Z"
+  }
+]

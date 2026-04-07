@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main style="display: flex; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+      <h2 class="text-center">Book a Doctor Appointment</h2>
+      <p class="text-center">Schedule an in-person or remote checkup.</p>
+      
+      <div id="msg" class="alert hidden"></div>
+      
+      <form id="appointmentForm">
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+        
+        <label for="time">Time</label>
+        <input type="time" id="time" required>
+        
+        <label for="description">Reason for visit / Symptoms</label>
+        <textarea id="description" rows="4" required></textarea>
+        
+        <button type="submit" class="btn w-100" style="width: 100%;">Book Appointment</button>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    if (!api.getToken() || !api.getUser()) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const description = document.getElementById('description').value;
+      const msg = document.getElementById('msg');
+      
+      msg.classList.add('hidden');
+      
+      try {
+        const res = await api.request('/users/appointments', 'POST', { date, time, description });
+        if (res._id) {
+          msg.textContent = 'Appointment booked successfully!';
+          msg.className = 'alert alert-success';
+          document.getElementById('appointmentForm').reset();
+        } else {
+          msg.textContent = res.message || 'Failed to book';
+          msg.className = 'alert alert-error';
+        }
+      } catch (err) {
+        msg.textContent = 'Network error. Try again.';
+        msg.className = 'alert alert-error';
+      }
+    });
+  </script>
+</body>
+</html>

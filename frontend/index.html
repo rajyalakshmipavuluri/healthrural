@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Awareness in Rural Areas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav id="navbar">
+      <a href="index.html">Home</a>
+      <a href="articles.html">Health Info</a>
+      <div id="authLinks" style="display:inline-block">
+        <a href="login.html">Login</a>
+        <a href="signup.html">Sign Up</a>
+      </div>
+      <div id="userLinks" style="display:none; display:inline-block">
+        <a href="dashboard.html" id="dashboardLink">Dashboard</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card text-center" style="background-color: var(--light-blue); max-width: 800px; margin: 0 auto 2rem auto;">
+      <h2>Welcome to HealthConnect</h2>
+      <p style="font-size: 1.2rem; line-height: 1.6;">Connecting rural communities with vital health information, hygiene guidelines, and remote medical consultations.</p>
+      <div style="margin-top: 1.5rem;">
+        <a href="articles.html" class="btn">Read Health Articles</a>
+        <a href="consultation.html" class="btn" style="background-color: var(--white); color: var(--primary-blue); border: 2px solid var(--primary-blue);">Ask a Doctor</a>
+      </div>
+    </div>
+
+    <h2 class="text-center">Daily Health Tips</h2>
+    <div id="tipsContainer" class="grid grid-3">
+      <p class="text-center w-100">Loading tips...</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Update Nav bar based on auth state
+    const user = api.getUser();
+    if (user && api.getToken()) {
+      document.getElementById('authLinks').style.display = 'none';
+      document.getElementById('userLinks').style.display = 'inline-block';
+      
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        api.logout();
+      });
+    }
+
+    // Fetch daily tips
+    async function loadTips() {
+      try {
+        const tips = await api.getTips();
+        const container = document.getElementById('tipsContainer');
+        container.innerHTML = '';
+        
+        if (tips.length === 0) {
+          container.innerHTML = '<p class="text-center w-100">No tips available right now.</p>';
+          return;
+        }
+
+        tips.forEach(tip => {
+          container.innerHTML += `
+            <div class="card" style="border-top: 4px solid var(--secondary-blue);">
+              <p style="font-size:1.1rem; font-style: italic;">"${tip.content}"</p>
+            </div>
+          `;
+        });
+      } catch (e) {
+        document.getElementById('tipsContainer').innerHTML = '<p>Error loading tips.</p>';
+      }
+    }
+
+    loadTips();
+  </script>
+</body>
+</html>

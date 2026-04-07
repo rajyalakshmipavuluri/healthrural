@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect - Dashboard</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Health Info</a>
+      <a href="appointments.html" id="navAppointments">Appointments</a>
+      <a href="consultation.html" id="navConsultations">Ask Doctor</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2 id="welcomeMsg">Welcome</h2>
+      <p>Manage your health interactions from here.</p>
+    </div>
+
+    <!-- Admin Section -->
+    <div id="adminSection" class="hidden">
+      <h3>Admin Panel</h3>
+      <div class="grid grid-2">
+        <div class="card" style="border-left: 4px solid var(--secondary-blue);">
+          <h4>Add Health Tip</h4>
+          <form id="tipForm">
+            <input type="text" id="tipContent" placeholder="Enter health tip..." required>
+            <button type="submit" class="btn">Add Tip</button>
+          </form>
+          <div id="tipMsg" class="alert hidden"></div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--green);">
+          <h4>Add Health Article</h4>
+          <form id="articleForm">
+            <input type="text" id="articleTitle" placeholder="Title" required>
+            <select id="articleCategory" required>
+              <option value="disease">Disease Information</option>
+              <option value="sanitation">Sanitation & Hygiene</option>
+              <option value="nutrition">Nutrition</option>
+              <option value="general">General</option>
+            </select>
+            <textarea id="articleContent" placeholder="Article content..." rows="4" required></textarea>
+            <button type="submit" class="btn">Publish Article</button>
+          </form>
+          <div id="articleMsg" class="alert hidden"></div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 2rem;">
+        <h4>Recent Consultations (Doctor View)</h4>
+        <div id="adminConsultationsList">Loading...</div>
+      </div>
+    </div>
+
+    <!-- User Section -->
+    <div id="userSection" class="hidden">
+      <div class="grid grid-2">
+        <div class="card">
+          <h4>My Appointments</h4>
+          <div id="userAppointmentsList">Loading...</div>
+          <a href="appointments.html" class="btn" style="margin-top: 10px;">Book New</a>
+        </div>
+        <div class="card">
+          <h4>My Consultations</h4>
+          <div id="userConsultationsList">Loading...</div>
+          <a href="consultation.html" class="btn" style="margin-top: 10px;">Ask New Question</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    const user = api.getUser();
+    if (!user || !api.getToken()) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('welcomeMsg').innerText = `Welcome, ${user.name}`;
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      api.logout();
+    });
+
+    if (user.role === 'admin') {
+      document.getElementById('adminSection').classList.remove('hidden');
+      loadAdminData();
+    } else {
+      document.getElementById('userSection').classList.remove('hidden');
+      loadUserData();
+    }
+
+    // --- Admin functions ---
+    document.getElementById('tipForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('tipContent').value;
+      const res = await api.request('/content/tips', 'POST', { content });
+      const msg = document.getElementById('tipMsg');
+      if (res._id) {
+        msg.textContent = 'Tip added successfully!';
+        msg.className = 'alert alert-success';
+        document.getElementById('tipForm').reset();
+      } else {
+        msg.textContent = res.message || 'Failed to add tip';
+        msg.className = 'alert alert-error';
+      }
+    });
+
+    document.getElementById('articleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('articleTitle').value;
+      const category = document.getElementById('articleCategory').value;
+      const content = document.getElementById('articleContent').value;
+      
+      const res = await api.request('/content/articles', 'POST', { title, category, content });
+      const msg = document.getElementById('articleMsg');
+      if (res._id) {
+        msg.textContent = 'Article published successfully!';
+        msg.className = 'alert alert-success';
+        document.getElementById('articleForm').reset();
+      } else {
+        msg.textContent = res.message || 'Failed to publish';
+        msg.className = 'alert alert-error';
+      }
+    });
+
+    async function loadAdminData() {
+      const cons = await api.request('/users/admin/consultations');
+      let html = '';
+      if(cons && cons.length > 0) {
+        cons.forEach(c => {
+          html += `<div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+            <strong>${c.subject}</strong> from ${c.patient ? c.patient.name : 'Unknown'}<br/>
+            <small>${c.description}</small><br/>
+            <em>Status: ${c.status}</em>
+            ${c.status === 'pending' ? `<br/><button class="btn btn-sm" onclick="respond('${c._id}')">Send Response</button>` : `<br/><strong>Response:</strong> ${c.doctorResponse}`}
+          </div>`;
+        });
+      } else {
+        html = '<p>No consultations found.</p>';
+      }
+      document.getElementById('adminConsultationsList').innerHTML = html;
+    }
+
+    window.respond = async function(id) {
+      const response = prompt("Enter your response/advice:");
+      if (response) {
+        await api.request(`/users/admin/consultations/${id}`, 'PUT', { response });
+        alert('Response sent!');
+        loadAdminData();
+      }
+    };
+
+    // --- User functions ---
+    async function loadUserData() {
+      // Load appointments
+      const apps = await api.request('/users/appointments');
+      let appHtml = '';
+      if(apps && apps.length > 0) {
+        apps.forEach(a => {
+          appHtml += `<p><strong>${new Date(a.date).toLocaleDateString()} at ${a.time}</strong><br/>${a.description}</p>`;
+        });
+      } else {
+        appHtml = '<p>No appointments booked.</p>';
+      }
+      document.getElementById('userAppointmentsList').innerHTML = appHtml;
+
+      // Load consultations
+      const cons = await api.request('/users/consultations');
+      let consHtml = '';
+      if(cons && cons.length > 0) {
+        cons.forEach(c => {
+          consHtml += `<div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+            <strong>${c.subject}</strong><br/>
+            ${c.status === 'pending' ? '<em>Pending Doctor Reply</em>' : `<strong>Doctor says:</strong> ${c.doctorResponse}`}
+          </div>`;
+        });
+      } else {
+        consHtml = '<p>No questions asked yet.</p>';
+      }
+      document.getElementById('userConsultationsList').innerHTML = consHtml;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Information - HealthConnect</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .category-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      background-color: var(--light-blue);
+      color: var(--primary-blue);
+      margin-bottom: 10px;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HealthConnect</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" id="dashLink" style="display:none;">Dashboard</a>
+      <a href="login.html" id="loginLink">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 class="text-center">Health Library</h2>
+    <p class="text-center">Read articles to learn about diseases, prevention strategies, and healthy habits.</p>
+    
+    <div style="margin-bottom: 20px; text-align: center;">
+      <input type="text" id="searchInput" placeholder="Search articles..." style="max-width: 400px; display: inline-block;">
+    </div>
+
+    <div id="articlesContainer" class="grid">
+      <p class="text-center w-100">Loading articles...</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Health Awareness in Rural Areas Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    if (api.getToken()) {
+      document.getElementById('loginLink').style.display = 'none';
+      document.getElementById('dashLink').style.display = 'inline-block';
+    }
+
+    let allArticles = [];
+
+    async function loadArticles() {
+      try {
+        allArticles = await api.getArticles();
+        renderArticles(allArticles);
+      } catch (e) {
+        document.getElementById('articlesContainer').innerHTML = '<p class="text-center">Failed to load articles.</p>';
+      }
+    }
+
+    function renderArticles(articles) {
+      const container = document.getElementById('articlesContainer');
+      container.innerHTML = '';
+      
+      if (articles.length === 0) {
+        container.innerHTML = '<p class="text-center w-100">No articles found.</p>';
+        return;
+      }
+
+      articles.forEach(article => {
+        container.innerHTML += `
+          <div class="card">
+            <span class="category-tag">${article.category}</span>
+            <h3 style="margin-top: 0;">${article.title}</h3>
+            <p>${article.content.replace(/\n/g, '<br>')}</p>
+            <small style="color: grey;">Written by: ${article.author ? article.author.name : 'Admin'} | ${new Date(article.createdAt).toLocaleDateString()}</small>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allArticles.filter(a => 
+        a.title.toLowerCase().includes(term) || a.content.toLowerCase().includes(term) || a.category.toLowerCase().includes(term)
+      );
+      renderArticles(filtered);
+    });
+
+    loadArticles();
+  </script>
+</body>
+</html>
